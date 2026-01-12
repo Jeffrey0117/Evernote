@@ -18,3 +18,10 @@ Thumbs.db
 
 # Astro
 .astro/
+
+# Claude
+.claude/
+tmpclaude-*
+
+# Project guide (for AI reference only)
+src/pages/posts/project-guide.md

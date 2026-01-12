@@ -152,6 +152,18 @@ body {
   border-color: var(--text-primary);
 }
 
+/* 置頂標記 */
+.pinned-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--bg-primary);
+  background: var(--accent);
+  padding: 0.2em 0.5em;
+  border-radius: 3px;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+
 /* ====================================
    文章列表
    ==================================== */

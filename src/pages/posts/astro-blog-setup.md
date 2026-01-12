@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/PostLayout.astro
 title: 用 Astro 建立技術筆記網站
-date: 2025-01-12
+date: 2025-01-12T10:00
 description: 記錄使用 Astro 框架建立部落格的過程，包含 Markdown 內容管理和簡約風格設計。
 tags:
   - Astro

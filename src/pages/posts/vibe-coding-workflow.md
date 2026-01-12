@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/PostLayout.astro
 title: Vibe Coding 工作流程筆記
-date: 2025-01-10
+date: 2025-01-10T16:00
 description: 整理與 AI 協作開發的心得，如何更有效率地進行 vibe coding。
 tags:
   - Vibe Coding

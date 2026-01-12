@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/PostLayout.astro
 title: Electronmon - Electron 主進程自動重啟神器
-date: 2026-01-13
+date: 2026-01-13T05:00
 description: 解決 Electron 開發時每次改 main.js 都要手動重啟的痛苦，讓開發體驗更絲滑
 tags:
   - Electron

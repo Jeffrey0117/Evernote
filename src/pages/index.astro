@@ -4,8 +4,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 // 取得所有 markdown 文章
 const posts = await Astro.glob('./posts/*.md');
 
-// 按日期排序（新的在前）
+// 按日期排序（新的在前），置頂文章優先
 const sortedPosts = posts.sort((a, b) => {
+  // 置頂優先
+  if (a.frontmatter.pinned && !b.frontmatter.pinned) return -1;
+  if (!a.frontmatter.pinned && b.frontmatter.pinned) return 1;
+  // 再按日期排序
   return new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime();
 });
 
@@ -14,15 +18,21 @@ const allTags = [...new Set(sortedPosts.flatMap(post => post.frontmatter.tags ||
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString('zh-TW', {
+  const datePart = date.toLocaleDateString('zh-TW', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
   }).replace(/\//g, '.');
+  const timePart = date.toLocaleTimeString('zh-TW', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  return `${datePart} ${timePart}`;
 };
 ---
 
-<BaseLayout title="vibe.notes | Vibe Coding 技術筆記">
+<BaseLayout title="Jeffrey0117 技術筆記">
   <section>
     <div class="tag-filter">
       <button class="filter-btn active" data-tag="all">全部</button>
@@ -37,6 +47,7 @@ const formatDate = (dateStr: string) => {
             {formatDate(post.frontmatter.date)}
           </time>
           <h2 class="post-title">
+            {post.frontmatter.pinned && <span class="pinned-badge">置頂</span>}
             <a href={post.url}>{post.frontmatter.title}</a>
           </h2>
           {post.frontmatter.description && (

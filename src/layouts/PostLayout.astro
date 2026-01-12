@@ -14,15 +14,21 @@ const { frontmatter } = Astro.props;
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString('zh-TW', {
+  const datePart = date.toLocaleDateString('zh-TW', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
+  const timePart = date.toLocaleTimeString('zh-TW', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  return `${datePart} ${timePart}`;
 };
 ---
 
-<BaseLayout title={`${frontmatter.title} | vibe.notes`} description={frontmatter.description}>
+<BaseLayout title={`${frontmatter.title} | Jeffrey0117`} description={frontmatter.description}>
   <article>
     <a href="/" class="back-link">← 返回列表</a>
     

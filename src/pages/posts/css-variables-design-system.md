@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/PostLayout.astro
 title: 現代 CSS 變數系統設計
-date: 2025-01-08
+date: 2025-01-08T14:00
 description: 如何使用 CSS Custom Properties 建立可維護的設計系統。
 tags:
   - CSS
