@@ -13,6 +13,15 @@ const sortedPosts = posts.sort((a, b) => {
   return new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime();
 });
 
+// 主分類定義
+const categories = {
+  '全部': [],
+  '技術': ['Electron', 'React', 'Python', 'Node.js', 'CSS', 'TypeScript', 'Astro', 'OpenCV', 'Tesseract.js', 'JSZip', 'AI', 'OCR', '前端', '設計系統'],
+  '觀念': ['開發觀念', '專案管理', '寫作', '技術分享', 'Vibe Coding', '工作流程'],
+  '專案': ['專案心得', '專案文件'],
+  '工具': ['CLI', 'VSCode', '開發工具', 'DX', 'Windows', '自動化'],
+};
+
 // 收集所有 tags
 const allTags = [...new Set(sortedPosts.flatMap(post => post.frontmatter.tags || []))];
 
@@ -30,63 +39,287 @@ const formatDate = (dateStr: string) => {
   });
   return `${datePart} ${timePart}`;
 };
+
+// 最近 5 篇文章（給側邊欄用）
+const recentPosts = sortedPosts.filter(p => !p.frontmatter.pinned).slice(0, 5);
 ---
 
 <BaseLayout title="Jeffrey0117 技術筆記">
-  <section>
-    <div class="tag-filter">
-      <button class="filter-btn active" data-tag="all">全部</button>
-      {allTags.map((tag) => (
-        <button class="filter-btn" data-tag={tag}>{tag}</button>
-      ))}
-    </div>
-    <ul class="post-list">
-      {sortedPosts.map((post) => (
-        <li class="post-item" data-tags={JSON.stringify(post.frontmatter.tags || [])}>
-          <time class="post-date" datetime={post.frontmatter.date}>
-            {formatDate(post.frontmatter.date)}
-          </time>
-          <h2 class="post-title">
-            {post.frontmatter.pinned && <span class="pinned-badge">置頂</span>}
-            <a href={post.url}>{post.frontmatter.title}</a>
-          </h2>
-          {post.frontmatter.description && (
-            <p class="post-excerpt">{post.frontmatter.description}</p>
-          )}
-          {post.frontmatter.tags && post.frontmatter.tags.length > 0 && (
-            <div class="post-tags">
-              {post.frontmatter.tags.map((tag: string) => (
-                <span class="tag">{tag}</span>
-              ))}
-            </div>
-          )}
-        </li>
-      ))}
-    </ul>
-  </section>
+  <div class="home-layout">
+    <section class="main-content">
+      <!-- 主分類 -->
+      <div class="category-filter">
+        {Object.keys(categories).map((cat) => (
+          <button class={`category-btn ${cat === '全部' ? 'active' : ''}`} data-category={cat}>
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <!-- 文章列表 -->
+      <ul class="post-list">
+        {sortedPosts.map((post) => (
+          <li class="post-item" data-tags={JSON.stringify(post.frontmatter.tags || [])}>
+            <time class="post-date" datetime={post.frontmatter.date}>
+              {formatDate(post.frontmatter.date)}
+            </time>
+            <h2 class="post-title">
+              {post.frontmatter.pinned && <span class="pinned-badge">置頂</span>}
+              <a href={post.url}>{post.frontmatter.title}</a>
+            </h2>
+            {post.frontmatter.description && (
+              <p class="post-excerpt">{post.frontmatter.description}</p>
+            )}
+            {post.frontmatter.tags && post.frontmatter.tags.length > 0 && (
+              <div class="post-tags">
+                {post.frontmatter.tags.map((tag: string) => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <!-- 所有標籤（底部） -->
+      <div class="all-tags-section">
+        <button class="tags-toggle">
+          <span>所有標籤</span>
+          <span class="toggle-icon">▼</span>
+        </button>
+        <div class="all-tags collapsed">
+          {allTags.map((tag) => (
+            <button class="filter-btn" data-tag={tag}>{tag}</button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3>關於</h3>
+        <p>紀錄開發專案時學到的技術、踩過的坑、一些想法。</p>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>最近文章</h3>
+        <ul class="recent-posts">
+          {recentPosts.map((post) => (
+            <li>
+              <a href={post.url}>{post.frontmatter.title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>連結</h3>
+        <ul class="sidebar-links">
+          <li><a href="https://github.com/Jeffrey0117" target="_blank">GitHub</a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
 </BaseLayout>
 
-<script>
+<script define:vars={{ categories }}>
+  const categoryBtns = document.querySelectorAll('.category-btn');
   const filterBtns = document.querySelectorAll('.filter-btn');
   const postItems = document.querySelectorAll('.post-item');
+  const tagsToggle = document.querySelector('.tags-toggle');
+  const allTagsDiv = document.querySelector('.all-tags');
 
-  filterBtns.forEach(btn => {
+  // 主分類過濾
+  categoryBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const tag = btn.getAttribute('data-tag');
+      const category = btn.getAttribute('data-category');
 
-      // 更新 active 狀態
-      filterBtns.forEach(b => b.classList.remove('active'));
+      categoryBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // 過濾文章
+      // 清除細項 tag 的 active
+      filterBtns.forEach(b => b.classList.remove('active'));
+
       postItems.forEach(item => {
-        if (tag === 'all') {
+        if (category === '全部') {
           item.style.display = '';
         } else {
           const tags = JSON.parse(item.getAttribute('data-tags') || '[]');
-          item.style.display = tags.includes(tag) ? '' : 'none';
+          const categoryTags = categories[category] || [];
+          const hasMatch = tags.some(tag => categoryTags.includes(tag));
+          item.style.display = hasMatch ? '' : 'none';
         }
       });
     });
   });
+
+  // 細項 tag 過濾
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-tag');
+
+      // 清除主分類的 active，只保留「全部」
+      categoryBtns.forEach(b => b.classList.remove('active'));
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      postItems.forEach(item => {
+        const tags = JSON.parse(item.getAttribute('data-tags') || '[]');
+        item.style.display = tags.includes(tag) ? '' : 'none';
+      });
+    });
+  });
+
+  // 展開/收合標籤
+  tagsToggle.addEventListener('click', () => {
+    allTagsDiv.classList.toggle('collapsed');
+    const icon = tagsToggle.querySelector('.toggle-icon');
+    icon.textContent = allTagsDiv.classList.contains('collapsed') ? '▼' : '▲';
+  });
 </script>
+
+<style>
+  .home-layout {
+    position: relative;
+  }
+
+  .main-content {
+    max-width: 720px;
+  }
+
+  .sidebar {
+    position: fixed;
+    right: 3rem;
+    top: 180px;
+    width: 180px;
+  }
+
+  @media (max-width: 1100px) {
+    .sidebar {
+      display: none;
+    }
+  }
+
+  /* 主分類 */
+  .category-filter {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+  }
+
+  .category-btn {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--bg-tertiary);
+    padding: 0.4em 1em;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .category-btn:hover {
+    border-color: var(--accent-light);
+    color: var(--text-primary);
+  }
+
+  .category-btn.active {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border-color: var(--text-primary);
+  }
+
+  /* 底部標籤區 */
+  .all-tags-section {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--bg-tertiary);
+  }
+
+  .tags-toggle {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .tags-toggle:hover {
+    color: var(--text-secondary);
+  }
+
+  .toggle-icon {
+    font-size: 0.6rem;
+  }
+
+  .all-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    transition: all 0.3s ease;
+  }
+
+  .all-tags.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+  }
+
+  .all-tags:not(.collapsed) {
+    max-height: 500px;
+    opacity: 1;
+  }
+
+  /* 側邊欄 */
+  .sidebar {
+    font-size: 0.85rem;
+  }
+
+  .sidebar-section {
+    margin-bottom: var(--space-lg);
+  }
+
+  .sidebar-section h3 {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-sm);
+  }
+
+  .sidebar-section p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .recent-posts,
+  .sidebar-links {
+    list-style: none;
+  }
+
+  .recent-posts li,
+  .sidebar-links li {
+    margin-bottom: var(--space-xs);
+  }
+
+  .recent-posts a,
+  .sidebar-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .recent-posts a:hover,
+  .sidebar-links a:hover {
+    color: var(--accent);
+  }
+</style>
