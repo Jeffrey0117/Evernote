@@ -59,7 +59,16 @@ console.log(result.data.text);
 
 100 張圖處理完，總不能讓使用者點 100 次下載。要打包成 ZIP。
 
-前端打包 ZIP 的 library 不多，比較常見的就 [JSZip](https://stuk.github.io/jszip/) 和 [fflate](https://github.com/101arrowz/fflate)。fflate 效能比較好，但 API 比較底層。JSZip 簡單直覺，對我的需求來說夠用了。
+前端打包 ZIP 的 library 不多，主要就兩個：
+
+| Library | 定位 | 適合場景 |
+|---------|------|----------|
+| [JSZip](https://stuk.github.io/jszip/) | 簡單易用，API 直覺 | 一般場景，快速開發 |
+| [fflate](https://github.com/101arrowz/fflate) | 效能導向，體積小，速度快 | 大檔案、高效能需求 |
+
+fflate 號稱是「最快的 JavaScript 壓縮 library」，用 TypeScript 寫的，支援 streaming，壓縮大檔案時不會卡住。但 API 比較底層，要自己處理比較多細節。
+
+JSZip 就是典型的「簡單好用」路線，三行搞定：
 
 ```javascript
 import JSZip from 'jszip';
@@ -71,13 +80,13 @@ zip.file('image2.png', blob2);
 const zipBlob = await zip.generateAsync({ type: 'blob' });
 ```
 
-三行搞定，整個過程都在瀏覽器完成。
+對我的需求來說，圖片本身已經是壓縮格式（PNG/JPG），ZIP 再壓也壓不了多少，效能不是瓶頸，所以選 JSZip。
 
 用是很簡單，但我好奇 ZIP 到底是怎麼運作的，就去研究了一下。
 
----
+### ZIP 的結構
 
-ZIP 的結構其實不複雜，就是一堆檔案串在一起，最後加一個目錄：
+ZIP 其實不複雜，就是一堆檔案串在一起，最後加一個目錄：
 
 ```
 [檔案 1 的 header][檔案 1 的內容]
@@ -100,17 +109,17 @@ ZIP 的結構其實不複雜，就是一堆檔案串在一起，最後加一個�
 | 26 | 2 bytes | 檔名長度 |
 | 30 | n bytes | 檔名 |
 
-後面接檔案內容。如果壓縮方式是 0（STORE），就是原封不動塞進去；如果是 8（DEFLATE），要先壓縮。
+後面接檔案內容。如果壓縮方式是 0（STORE），就是原封不動塞進去；如果是 8（DEFLATE），要先用 [DEFLATE 演算法](https://en.wikipedia.org/wiki/Deflate) 壓縮。
 
 最後的 Central Directory 是整個 ZIP 的目錄，記錄每個檔案在 ZIP 裡的 offset，這樣解壓縮的時候可以直接跳到指定檔案，不用從頭讀。
 
----
+### CRC32 怎麼算
 
-比較麻煩的是 **CRC32**。
+比較麻煩的是 CRC32。
 
 CRC32 是一種 checksum 演算法，用來驗證檔案有沒有損壞。ZIP 規定每個檔案都要算 CRC32 塞進 header。
 
-演算法本身是 bit 操作，要建一個 lookup table 加速：
+演算法本身是 bit 操作，核心概念是把資料當成一個超長的二進位數字，對一個「多項式」做除法，取餘數。實作上會建一個 lookup table 加速：
 
 ```javascript
 function makeCrcTable() {
@@ -135,9 +144,9 @@ function crc32(data) {
 }
 ```
 
-那個 `0xEDB88320` 是 CRC32 的多項式常數，反轉過的。這段 code 我看了三遍才懂它在幹嘛。
+那個 `0xEDB88320` 是 CRC32 的多項式常數，反轉過的版本。這段 code 我看了三遍才懂它在幹嘛。想深入理解可以看這篇：[A Painless Guide to CRC Error Detection Algorithms](http://www.ross.net/crc/download/crc_v3.txt)。
 
----
+### 自幹 ZIP 會怎樣
 
 所以如果要自幹一個 ZIP，大概要：
 
@@ -165,7 +174,7 @@ view.setUint16(26, filename.length, true);
 
 可以做，但要處理的細節很多，還有檔名編碼（UTF-8 flag）、64 位元擴展（ZIP64）之類的邊界情況。
 
-研究完之後更理解 JSZip 幫我省了多少事。
+研究完之後更理解 JSZip 幫我省了多少事。想看完整的 ZIP 規格可以參考 [PKWARE 的官方文件](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)。
 
 ---
 
