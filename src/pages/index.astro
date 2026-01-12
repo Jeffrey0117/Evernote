@@ -9,6 +9,9 @@ const sortedPosts = posts.sort((a, b) => {
   return new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime();
 });
 
+// 收集所有 tags
+const allTags = [...new Set(sortedPosts.flatMap(post => post.frontmatter.tags || []))];
+
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   return date.toLocaleDateString('zh-TW', {
@@ -21,9 +24,15 @@ const formatDate = (dateStr: string) => {
 
 <BaseLayout title="vibe.notes | Vibe Coding 技術筆記">
   <section>
+    <div class="tag-filter">
+      <button class="filter-btn active" data-tag="all">全部</button>
+      {allTags.map((tag) => (
+        <button class="filter-btn" data-tag={tag}>{tag}</button>
+      ))}
+    </div>
     <ul class="post-list">
       {sortedPosts.map((post) => (
-        <li class="post-item">
+        <li class="post-item" data-tags={JSON.stringify(post.frontmatter.tags || [])}>
           <time class="post-date" datetime={post.frontmatter.date}>
             {formatDate(post.frontmatter.date)}
           </time>
@@ -45,3 +54,28 @@ const formatDate = (dateStr: string) => {
     </ul>
   </section>
 </BaseLayout>
+
+<script>
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const postItems = document.querySelectorAll('.post-item');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-tag');
+
+      // 更新 active 狀態
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // 過濾文章
+      postItems.forEach(item => {
+        if (tag === 'all') {
+          item.style.display = '';
+        } else {
+          const tags = JSON.parse(item.getAttribute('data-tags') || '[]');
+          item.style.display = tags.includes(tag) ? '' : 'none';
+        }
+      });
+    });
+  });
+</script>
