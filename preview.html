@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>vibe.notes - 設計預覽</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500;700&family=Crimson+Pro:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #F9F7F4;
+      --bg-secondary: #F3F0EB;
+      --bg-tertiary: #EDE9E3;
+      --text-primary: #2C2C2C;
+      --text-secondary: #5A5A5A;
+      --text-muted: #8A8A8A;
+      --accent: #9C8B7A;
+      --accent-light: #C4B8AA;
+      --code-bg: #EFEBE5;
+      --code-border: #DDD7CE;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+      --font-sans: 'Noto Sans TC', -apple-system, sans-serif;
+      --font-serif: 'Crimson Pro', Georgia, serif;
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 2rem;
+      --space-xl: 4rem;
+      --max-width: 720px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 17px; scroll-behavior: smooth; }
+    
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--space-lg);
+    }
+
+    .site-header {
+      padding: var(--space-xl) 0 var(--space-lg);
+      border-bottom: 1px solid var(--bg-tertiary);
+      margin-bottom: var(--space-xl);
+    }
+
+    .site-title {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .site-title:hover { color: var(--accent); }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-lg);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: var(--space-lg);
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover { color: var(--text-primary); }
+
+    .post-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .post-item {
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .post-item:last-child { border-bottom: none; }
+
+    .post-date {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: var(--space-xs);
+    }
+
+    .post-title {
+      font-family: var(--font-sans);
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: var(--space-sm);
+    }
+
+    .post-title a {
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .post-title a:hover { color: var(--accent); }
+
+    .post-excerpt {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .post-tags {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      background: var(--bg-secondary);
+      padding: 0.2em 0.6em;
+      border-radius: 3px;
+    }
+
+    .site-footer {
+      margin-top: var(--space-xl);
+      padding: var(--space-xl) 0;
+      border-top: 1px solid var(--bg-tertiary);
+      text-align: center;
+    }
+
+    .site-footer p {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Code preview section */
+    .code-preview {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 6px;
+      padding: var(--space-md);
+      margin: var(--space-lg) 0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    .code-preview .keyword { color: #8B5CF6; }
+    .code-preview .string { color: #059669; }
+    .code-preview .comment { color: var(--text-muted); }
+
+    ::selection {
+      background: var(--accent-light);
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 640px) {
+      html { font-size: 16px; }
+      .container { padding: 0 var(--space-md); }
+      .site-header { padding: var(--space-lg) 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="site-header">
+      <nav class="site-nav">
+        <a href="#" class="site-title">vibe.notes</a>
+        <ul class="nav-links">
+          <li><a href="#">筆記</a></li>
+          <li><a href="#">關於</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <ul class="post-list">
+          <li class="post-item">
+            <time class="post-date">2025.01.12</time>
+            <h2 class="post-title">
+              <a href="#">用 Astro 建立技術筆記網站</a>
+            </h2>
+            <p class="post-excerpt">記錄使用 Astro 框架建立部落格的過程，包含 Markdown 內容管理和簡約風格設計。</p>
+            <div class="post-tags">
+              <span class="tag">Astro</span>
+              <span class="tag">部落格</span>
+              <span class="tag">前端</span>
+            </div>
+          </li>
+          
+          <li class="post-item">
+            <time class="post-date">2025.01.10</time>
+            <h2 class="post-title">
+              <a href="#">Vibe Coding 工作流程筆記</a>
+            </h2>
+            <p class="post-excerpt">整理與 AI 協作開發的心得，如何更有效率地進行 vibe coding。</p>
+            <div class="post-tags">
+              <span class="tag">Vibe Coding</span>
+              <span class="tag">AI</span>
+              <span class="tag">工作流程</span>
+            </div>
+          </li>
+          
+          <li class="post-item">
+            <time class="post-date">2025.01.08</time>
+            <h2 class="post-title">
+              <a href="#">現代 CSS 變數系統設計</a>
+            </h2>
+            <p class="post-excerpt">如何使用 CSS Custom Properties 建立可維護的設計系統。</p>
+            <div class="post-tags">
+              <span class="tag">CSS</span>
+              <span class="tag">設計系統</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <div class="code-preview">
+        <span class="comment">// 程式碼區塊預覽</span><br>
+        <span class="keyword">const</span> blog = {<br>
+        &nbsp;&nbsp;name: <span class="string">'vibe.notes'</span>,<br>
+        &nbsp;&nbsp;style: <span class="string">'minimal'</span>,<br>
+        &nbsp;&nbsp;colors: [<span class="string">'#F9F7F4'</span>, <span class="string">'#9C8B7A'</span>]<br>
+        };
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>Built with Astro · Vibe Coding 技術筆記</p>
+    </footer>
+  </div>
+</body>
+</html>

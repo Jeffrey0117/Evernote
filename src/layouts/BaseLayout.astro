@@ -1,0 +1,44 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Vibe Coding 技術筆記' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="container">
+      <header class="site-header">
+        <nav class="site-nav">
+          <a href="/" class="site-title">vibe.notes</a>
+          <ul class="nav-links">
+            <li><a href="/">筆記</a></li>
+            <li><a href="/about">關於</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main>
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <p>Built with Astro · Vibe Coding 技術筆記</p>
+      </footer>
+    </div>
+
+    <style is:global>
+      @import '../styles/global.css';
+    </style>
+  </body>
+</html>

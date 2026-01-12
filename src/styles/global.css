@@ -1,0 +1,406 @@
+/* ====================================
+   Vibe Notes - 工程師筆記風格
+   淺米白 × 溫暖灰 × 極簡排版
+   ==================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500;700&family=Crimson+Pro:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  /* 溫暖米白色系 */
+  --bg-primary: #F9F7F4;
+  --bg-secondary: #F3F0EB;
+  --bg-tertiary: #EDE9E3;
+  
+  /* 灰階文字 */
+  --text-primary: #2C2C2C;
+  --text-secondary: #5A5A5A;
+  --text-muted: #8A8A8A;
+  
+  /* 強調色 - 低調的暖棕 */
+  --accent: #9C8B7A;
+  --accent-light: #C4B8AA;
+  
+  /* 程式碼區塊 */
+  --code-bg: #EFEBE5;
+  --code-border: #DDD7CE;
+  
+  /* 字型 */
+  --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+  --font-sans: 'Noto Sans TC', -apple-system, sans-serif;
+  --font-serif: 'Crimson Pro', Georgia, serif;
+  
+  /* 間距 */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 2rem;
+  --space-xl: 4rem;
+  
+  /* 最大寬度 */
+  --max-width: 720px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 17px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ====================================
+   Layout
+   ==================================== */
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* ====================================
+   Header - 極簡風格
+   ==================================== */
+
+.site-header {
+  padding: var(--space-xl) 0 var(--space-lg);
+  border-bottom: 1px solid var(--bg-tertiary);
+  margin-bottom: var(--space-xl);
+}
+
+.site-title {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.site-title:hover {
+  color: var(--accent);
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.nav-links {
+  display: flex;
+  gap: var(--space-lg);
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--text-primary);
+}
+
+/* ====================================
+   文章列表
+   ==================================== */
+
+.post-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.post-item {
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.post-date {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.post-title {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: var(--space-sm);
+}
+
+.post-title a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.post-title a:hover {
+  color: var(--accent);
+}
+
+.post-excerpt {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.post-tags {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  padding: 0.2em 0.6em;
+  border-radius: 3px;
+}
+
+/* ====================================
+   文章內容
+   ==================================== */
+
+.post-header {
+  margin-bottom: var(--space-xl);
+}
+
+.post-header .post-title {
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: var(--space-sm);
+}
+
+.post-meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.post-content {
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+.post-content h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+}
+
+.post-content h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+
+.post-content p {
+  margin-bottom: var(--space-md);
+}
+
+.post-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.post-content a:hover {
+  color: var(--text-primary);
+}
+
+.post-content strong {
+  font-weight: 600;
+}
+
+.post-content em {
+  font-style: italic;
+}
+
+/* 行內程式碼 */
+.post-content code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  color: var(--text-primary);
+}
+
+/* 程式碼區塊 */
+.post-content pre {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 6px;
+  padding: var(--space-md);
+  overflow-x: auto;
+  margin: var(--space-lg) 0;
+  line-height: 1.6;
+}
+
+.post-content pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* 引用 */
+.post-content blockquote {
+  border-left: 2px solid var(--accent-light);
+  padding-left: var(--space-md);
+  margin: var(--space-lg) 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* 列表 */
+.post-content ul,
+.post-content ol {
+  margin: var(--space-md) 0;
+  padding-left: var(--space-lg);
+}
+
+.post-content li {
+  margin-bottom: var(--space-sm);
+}
+
+/* 圖片 */
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: var(--space-lg) 0;
+}
+
+/* 水平線 */
+.post-content hr {
+  border: none;
+  height: 1px;
+  background: var(--bg-tertiary);
+  margin: var(--space-xl) 0;
+}
+
+/* ====================================
+   Footer
+   ==================================== */
+
+.site-footer {
+  margin-top: var(--space-xl);
+  padding: var(--space-xl) 0;
+  border-top: 1px solid var(--bg-tertiary);
+  text-align: center;
+}
+
+.site-footer p {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ====================================
+   Back Link
+   ==================================== */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: var(--space-lg);
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--text-primary);
+}
+
+/* ====================================
+   Responsive
+   ==================================== */
+
+@media (max-width: 640px) {
+  html {
+    font-size: 16px;
+  }
+  
+  .container {
+    padding: 0 var(--space-md);
+  }
+  
+  .site-header {
+    padding: var(--space-lg) 0;
+  }
+  
+  .post-header .post-title {
+    font-size: 1.4rem;
+  }
+}
+
+/* ====================================
+   Selection
+   ==================================== */
+
+::selection {
+  background: var(--accent-light);
+  color: var(--text-primary);
+}
+
+/* ====================================
+   Scrollbar
+   ==================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}

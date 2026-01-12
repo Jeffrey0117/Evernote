@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// 取得所有 markdown 文章
+const posts = await Astro.glob('./posts/*.md');
+
+// 按日期排序（新的在前）
+const sortedPosts = posts.sort((a, b) => {
+  return new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime();
+});
+
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\//g, '.');
+};
+---
+
+<BaseLayout title="vibe.notes | Vibe Coding 技術筆記">
+  <section>
+    <ul class="post-list">
+      {sortedPosts.map((post) => (
+        <li class="post-item">
+          <time class="post-date" datetime={post.frontmatter.date}>
+            {formatDate(post.frontmatter.date)}
+          </time>
+          <h2 class="post-title">
+            <a href={post.url}>{post.frontmatter.title}</a>
+          </h2>
+          {post.frontmatter.description && (
+            <p class="post-excerpt">{post.frontmatter.description}</p>
+          )}
+          {post.frontmatter.tags && post.frontmatter.tags.length > 0 && (
+            <div class="post-tags">
+              {post.frontmatter.tags.map((tag: string) => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
