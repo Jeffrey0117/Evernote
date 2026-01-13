@@ -44,17 +44,32 @@ const formatDate = (dateStr: string) => {
 const getExcerpt = (post: any) => {
   const desc = post.frontmatter.description || '';
   const content = post.rawContent?.() || '';
-  // 移除 frontmatter 和標題，取前 100 字
+  // 移除 frontmatter、標題、markdown 語法
   const cleanContent = content
-    .replace(/^---[\s\S]*?---/, '')
-    .replace(/^#+\s+.*/gm, '')
+    .replace(/^---[\s\S]*?---/, '')       // frontmatter
+    .replace(/^#+\s+.*/gm, '')            // 標題
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // [text](url) -> text
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '') // 圖片移除
+    .replace(/`{3}[\s\S]*?`{3}/g, '')     // code block
+    .replace(/`([^`]+)`/g, '$1')          // inline code
+    .replace(/\*\*([^*]+)\*\*/g, '$1')    // **bold**
+    .replace(/\*([^*]+)\*/g, '$1')        // *italic*
+    .replace(/~~([^~]+)~~/g, '$1')        // ~~strikethrough~~
+    .replace(/>\s+/g, '')                 // blockquote
+    .replace(/[-*+]\s+/g, '')             // list items
+    .replace(/\d+\.\s+/g, '')             // numbered list
     .replace(/\n+/g, ' ')
     .trim()
     .slice(0, 100);
-  if (desc && cleanContent) {
-    return `${desc} — ${cleanContent}...`;
+
+  // 保留原本的 description，再加內文
+  if (desc) {
+    if (cleanContent) {
+      return `${desc} — ${cleanContent}...`;
+    }
+    return desc;
   }
-  return desc || (cleanContent ? `${cleanContent}...` : '');
+  return cleanContent ? `${cleanContent}...` : '';
 };
 
 // 分頁設定
