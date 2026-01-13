@@ -247,4 +247,27 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.send_json({"hello": "world"})
 ```
 
-如果你的應用需要即時更新（進度條、聊天室、即時通知），WebSocket 是比輪詢更好的選擇。
+---
+
+## 哪些場景會用到
+
+WebSocket 不只是下載進度，很多網頁功能都靠它：
+
+| 場景 | 為什麼用 WebSocket |
+|------|-------------------|
+| **聊天室** | 對方發訊息要馬上看到，不能等輪詢 |
+| **通知系統** | 有人按讚、留言、@你，要即時跳出來 |
+| **協作編輯** | Google Docs 那種多人同時編輯，游標要即時同步 |
+| **股票行情** | 價格一直在變，輪詢會漏掉波動 |
+| **線上遊戲** | 玩家動作要即時同步，延遲一秒就輸了 |
+| **直播互動** | 彈幕、送禮、投票，觀眾操作要即時顯示 |
+
+你在用的 Facebook、Discord、Slack、Notion，背後都有 WebSocket。
+
+下次看到網頁上有「即時」的東西，打開 DevTools 的 Network 分頁，篩選 WS，大概率能看到 WebSocket 連線。
+
+---
+
+如果你的應用需要即時更新，WebSocket 是比輪詢更好的選擇。
+
+別再讓前端一直問「好了沒」了。
