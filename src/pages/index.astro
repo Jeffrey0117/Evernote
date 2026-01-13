@@ -135,6 +135,19 @@ const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
         </ul>
       </div>
 
+      <div class="sidebar-section sidebar-meta">
+        <p class="meta-timer">
+          地球繞太陽一圈要 8760 小時
+          <br />
+          這網站活了 <span id="hours-alive">0</span> 小時
+        </p>
+        <p class="meta-visitor">
+          不小心點進來的人
+          <br />
+          <img src="https://visitor-badge.laobi.icu/badge?page_id=jeffrey0117.evernote" alt="visitors" />
+        </p>
+      </div>
+
       <div class="sidebar-section">
         <h3>連結</h3>
         <ul class="sidebar-links">
@@ -144,6 +157,14 @@ const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
     </aside>
   </div>
 </BaseLayout>
+
+<script>
+  // 網站開始日期（改成你的實際日期）
+  const startDate = new Date('2026-01-13T00:00:00');
+  const now = new Date();
+  const hoursAlive = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60));
+  document.getElementById('hours-alive').textContent = hoursAlive.toLocaleString();
+</script>
 
 <script define:vars={{ categories }}>
   const categoryBtns = document.querySelectorAll('.category-btn');
@@ -331,6 +352,20 @@ const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
 
   .sidebar-section {
     margin-bottom: var(--space-lg);
+  }
+
+  .sidebar-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .sidebar-meta p {
+    margin-bottom: var(--space-md);
+  }
+
+  .sidebar-meta img {
+    margin-top: var(--space-xs);
   }
 
   .sidebar-section h3 {
