@@ -118,7 +118,7 @@ const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
               <p class="post-desc">{post.frontmatter.description}</p>
             )}
             {getContentExcerpt(post) && (
-              <p class="post-content-preview">「{getContentExcerpt(post)}...」</p>
+              <p class="post-content-preview">{getContentExcerpt(post)}...</p>
             )}
             {post.frontmatter.tags && post.frontmatter.tags.length > 0 && (
               <div class="post-tags">
@@ -461,6 +461,22 @@ const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
     font-family: var(--font-mono);
     font-size: 0.8rem;
     color: var(--text-muted);
+  }
+
+  /* 文章摘要 */
+  .post-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 0.3rem;
+  }
+
+  .post-content-preview {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    font-style: italic;
+    opacity: 0.6;
   }
 
   /* 側邊欄 */
