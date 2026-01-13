@@ -83,7 +83,7 @@ yazi %*
 
 於是我真的做了一個工具，用 JSON 設定檔產生一堆 batch 檔，讓 Windows 也能用 Unix 指令。
 
-詳情見：[在 Windows 上跑 Unix 指令不用裝 WSL](/posts/cmdx-unix-commands-on-windows)
+詳情見：[在 Windows 上跑 Unix 指令不用裝 WSL](/Evernote/posts/cmdx-unix-commands-on-windows)
 
 ## 為什麼選 yazi
 

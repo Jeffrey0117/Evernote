@@ -281,6 +281,7 @@ WebP 的壓縮率比 JPEG 好，同樣品質體積更小。
 
 ## 延伸閱讀
 
+- [對、對、對，對了三次你就錯了](./three-rights-make-a-wrong) — 這種「組合拳陷阱」不只這個例子，軟體開發裡到處都是
 - [localForage](https://github.com/localForage/localForage) — 把 IndexedDB 包成像 localStorage 一樣簡單
 - [idb](https://github.com/jakearchibald/idb) — Jake Archibald 寫的輕量 IndexedDB wrapper
 - [Storage for the Web](https://web.dev/articles/storage-for-the-web) — 各種瀏覽器儲存方案的比較
