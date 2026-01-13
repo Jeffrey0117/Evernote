@@ -5,6 +5,20 @@ interface Props {
 }
 
 const { title, description = 'Jeffrey0117 技術筆記' } = Astro.props;
+
+const taglines = [
+  '我如果沒有寫文章，這裡就不會有東西',
+  '當我來這裡的時候，關你屁事？',
+  '有時候不把知識記錄下來，還不知道芝士是什麼呢',
+  '學得越多，就會越強，幻想病是這樣惡化的',
+  '寫 code 寫到懷疑人生，不如來懷疑別人的 code',
+  '這裡的文章都是踩坑踩出來的，歡迎一起踩',
+  '如果你覺得這裡的內容有用，那你可能搞錯了',
+  '記錄是為了下次踩同一個坑的時候可以更快爬出來',
+  '這裡沒有最佳實踐，只有活下來的實踐',
+  '我不是在寫教學，我是在寫遺書',
+];
+const randomTagline = taglines[Math.floor(Math.random() * taglines.length)];
 ---
 
 <!doctype html>
@@ -20,7 +34,10 @@ const { title, description = 'Jeffrey0117 技術筆記' } = Astro.props;
     <div class="container">
       <header class="site-header">
         <nav class="site-nav">
-          <a href="/" class="site-title">Jeffrey0117</a>
+          <div class="site-brand">
+            <a href="/" class="site-title">Jeffrey0117</a>
+            <p class="site-tagline">{randomTagline}</p>
+          </div>
           <ul class="nav-links">
             <li><a href="/">筆記</a></li>
             <li><a href="/about">關於</a></li>

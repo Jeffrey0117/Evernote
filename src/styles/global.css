@@ -93,6 +93,18 @@ body {
   color: var(--accent);
 }
 
+.site-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.site-tagline {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
 .site-nav {
   display: flex;
   align-items: center;
