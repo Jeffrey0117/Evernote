@@ -132,29 +132,39 @@ export const TAGLINES = [
 | 禁止 | Google 圖片搜尋 | 版權不明、URL 不穩定 | 低 |
 | 禁止 | 隨便的網站圖片 | 可能下架、侵權 | 低 |
 
-### Unsplash 使用規範
+### Unsplash Source API（AI 專用）
 
-Unsplash 提供永久連結格式：
+AI 沒辦法真的去 Unsplash 搜尋，但可以用 Source API 透過關鍵字取圖：
 
 ```
-https://images.unsplash.com/photo-{PHOTO_ID}?w={WIDTH}&q={QUALITY}
+https://source.unsplash.com/{寬}x{高}/?{關鍵字1},{關鍵字2}
 ```
 
 **AI 生成文章時的標準格式：**
 
 ```markdown
-![圖片描述](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80)
+![程式碼編輯畫面](https://source.unsplash.com/800x450/?code,programming)
 ```
 
 | 參數 | 建議值 | 說明 |
 |------|--------|------|
-| w | 800 | 內文圖寬度 |
-| q | 80 | 品質（80 夠用且檔案小） |
+| 寬度 | 800 | 內文圖寬度 |
+| 高度 | 450 | 16:9 比例 |
+| 關鍵字 | 2-3 個 | 用逗號分隔，英文 |
 
-**搜尋圖片：**
-1. 去 [unsplash.com](https://unsplash.com) 搜尋關鍵字
-2. 點進圖片，URL 會有 photo ID
-3. 用上面的格式組成連結
+**注意：** 這個 API 每次載入可能會是不同圖片（同關鍵字隨機選）。如果需要固定圖片，人工去 Unsplash 找 photo ID。
+
+### 手動指定圖片（人工用）
+
+如果想要固定特定圖片：
+
+1. 去 [unsplash.com](https://unsplash.com) 搜尋
+2. 點進圖片，URL 會有 photo ID（如 `photo-1517694712202-14dd9538aa97`）
+3. 用這個格式：
+
+```markdown
+![描述](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80)
+```
 
 ### 圖片類型對應
 
@@ -203,14 +213,30 @@ public/
 ![截圖](/Evernote/images/posts/文章-slug/screenshot.png)
 ```
 
-### AI 生成文章的圖片指令
+### AI 生成文章的圖片 Prompt
 
-在請 AI 寫文章時，可以加上：
+在請 AI 寫文章時，加上這段：
 
-> 如果需要配圖，使用 Unsplash 圖片，格式為 `https://images.unsplash.com/photo-{ID}?w=800&q=80`。
-> 不要用 Google 搜尋來的圖片。
-> 如果是工具介紹，優先用官方 logo 或截圖。
-> 純技術教學文可以不放圖。
+```
+文章配圖規則：
+1. 觀念文、專案心得：開頭放一張主題圖
+   格式：![描述](https://source.unsplash.com/800x450/?關鍵字1,關鍵字2)
+2. 技術教學、速查筆記：不需要圖，程式碼就是視覺
+3. 工具介紹：用官方 logo 或截圖（需要人工補）
+4. 禁止用 Google 搜的圖、禁止亂猜 URL
+5. 關鍵字用英文，2-3 個，跟文章主題相關
+```
+
+**範例：**
+
+| 文章主題 | 關鍵字建議 |
+|----------|------------|
+| 軟體架構觀念 | architecture,abstract,minimal |
+| 開發心得 | workspace,laptop,coffee |
+| 效能優化 | speed,fast,motion |
+| 錯誤處理 | warning,caution,attention |
+| API 設計 | network,connection,abstract |
+| 資料庫 | data,server,technology |
 
 ---
 
