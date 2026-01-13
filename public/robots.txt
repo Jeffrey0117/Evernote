@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jeffrey0117.github.io/Evernote/sitemap-index.xml
