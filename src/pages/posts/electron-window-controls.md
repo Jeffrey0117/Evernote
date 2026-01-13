@@ -77,6 +77,9 @@ mainWindow.setAlwaysOnTop(alwaysOnTop);
 
 ## 縮小到托盤
 
+![Electron 系統托盤範例](https://www.tutorialspoint.com/electron/images/tray.jpg)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>Windows 右下角那排小圖示。點一下就能叫出應用。</small></p>
+
 語音辨識應用通常要「一直開著」。
 
 但不需要一直佔著畫面。

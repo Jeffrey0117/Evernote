@@ -67,6 +67,9 @@ processor.connect(audioContext.destination);
 
 `AudioWorklet` 跑在**獨立的音頻線程**，不會被主線程拖慢。
 
+![Web Audio API 架構圖](https://developer.chrome.com/static/blog/audio-worklet/image/main-global-scope-audio-1505a47d86d99.svg)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>左邊是主線程，右邊是音頻線程。ScriptProcessor 跑在左邊，AudioWorklet 跑在右邊。</small></p>
+
 聽起來很棒。
 
 然後我看了一下怎麼用。

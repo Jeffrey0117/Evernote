@@ -165,6 +165,9 @@ text = to_traditional(text)        # 4. 簡繁轉換
 
 如果字典很大（幾千個詞），每個詞都 `replace` 一次會很慢。
 
+![Aho-Corasick 自動機](https://upload.wikimedia.org/wikipedia/commons/9/90/A_diagram_of_the_Aho-Corasick_string_search_algorithm.svg)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>藍色箭頭是「失敗時跳到哪」，綠色箭頭是「這裡有匹配」。一次掃描就能找出所有匹配。</small></p>
+
 [Aho-Corasick 演算法](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm)可以一次掃描找出所有匹配，時間複雜度是 O(n)。
 
 Python 有現成套件：
