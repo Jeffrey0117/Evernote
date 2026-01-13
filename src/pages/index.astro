@@ -40,26 +40,32 @@ const formatDate = (dateStr: string) => {
   return `${datePart} ${timePart}`;
 };
 
-// 取得文章內文摘要（清理 markdown 和 HTML）
+// 取得文章內文摘要（清理 markdown、HTML、JS）
 const getContentExcerpt = (post: any) => {
+  // 置頂文章不顯示內文預覽
+  if (post.frontmatter.pinned) return '';
+
   const content = post.rawContent?.() || '';
   return content
     .replace(/^---[\s\S]*?---/, '')       // frontmatter
     .replace(/^#+\s+.*/gm, '')            // 標題
-    .replace(/<[^>]+>/g, '')              // HTML 標籤
+    .replace(/<[^>]*>/g, '')              // HTML 標籤
+    .replace(/\{[^}]*\}/g, '')            // JS 大括號內容
+    .replace(/\([^)]*\)/g, '')            // 括號內容（函數呼叫等）
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // [text](url) -> text
     .replace(/!\[([^\]]*)\]\([^)]+\)/g, '') // 圖片移除
     .replace(/`{3}[\s\S]*?`{3}/g, '')     // code block
-    .replace(/`([^`]+)`/g, '$1')          // inline code
+    .replace(/`[^`]+`/g, '')              // inline code 整個移除
     .replace(/\*\*([^*]+)\*\*/g, '$1')    // **bold**
     .replace(/\*([^*]+)\*/g, '$1')        // *italic*
     .replace(/~~([^~]+)~~/g, '$1')        // ~~strikethrough~~
     .replace(/>\s+/g, '')                 // blockquote
     .replace(/[-*+]\s+/g, '')             // list items
     .replace(/\d+\.\s+/g, '')             // numbered list
-    .replace(/\n+/g, ' ')
+    .replace(/[A-Za-z_$][A-Za-z0-9_$]*\s*[:=]/g, '') // 變數賦值
+    .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 120);
+    .slice(0, 100);
 };
 
 // 分頁設定
@@ -112,7 +118,7 @@ const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
               <p class="post-desc">{post.frontmatter.description}</p>
             )}
             {getContentExcerpt(post) && (
-              <p class="post-content-preview">{getContentExcerpt(post)}...</p>
+              <p class="post-content-preview">「{getContentExcerpt(post)}...」</p>
             )}
             {post.frontmatter.tags && post.frontmatter.tags.length > 0 && (
               <div class="post-tags">

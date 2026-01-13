@@ -231,6 +231,7 @@ body {
   font-size: 0.8rem;
   color: var(--text-muted);
   line-height: 1.5;
+  font-style: italic;
 }
 
 .post-tags {
