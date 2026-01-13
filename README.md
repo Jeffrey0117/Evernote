@@ -1,31 +1,25 @@
 <div align="center">
 
-# Jeffrey0117 技術筆記
+# Evernote
 
-**一個乾淨、極簡的 Astro 技術部落格**
-
-記錄開發專案時學到的技術、踩過的坑、一些想法。
+一個用 Astro 建的技術筆記部落格
 
 [![Astro](https://img.shields.io/badge/Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[線上預覽](https://jeffrey0117.github.io/Evernote/) · [回報問題](https://github.com/Jeffrey0117/Evernote/issues)
+[線上預覽](https://jeffrey0117.github.io/Evernote/)
 
 </div>
 
 ---
 
-## 特色
+## 這專案有什麼
 
-| 功能 | 說明 |
-|------|------|
-| **極簡設計** | 溫暖米白灰色調，專注閱讀體驗 |
-| **分類過濾** | 技術 / 觀念 / 專案 / 工具，快速找到文章 |
-| **全站搜尋** | Pagefind 靜態搜尋，無需後端 |
-| **RSS 訂閱** | 支援 RSS feed |
-| **SEO 優化** | Open Graph、Twitter Card、Sitemap |
-| **響應式** | 桌面、平板、手機都能看 |
+- 文章分類過濾（技術 / 觀念 / 專案 / 工具）
+- 分頁
+- Pagefind 全站搜尋
+- RSS feed
+- GitHub Actions 自動部署
 
 ## 技術棧
 
