@@ -14,17 +14,9 @@ draft: true
 
 ## 🎤 音頻處理
 
-### Web Audio API 的坑（ScriptProcessor → AudioWorklet）
+### ✅ Web Audio API 的坑（ScriptProcessor → AudioWorklet）
 
-**來源 commit**：串流辨識相關
-
-**可寫內容**：
-- ScriptProcessor 已經 deprecated，但還在用的原因
-- AudioWorklet 的設定地獄
-- 音頻緩衝區大小怎麼選
-- 採樣率轉換的坑
-
-**串流辨識文章有預告要寫這篇。**
+**已完成** → [web-audio-api-pitfalls.md](/Evernote/posts/web-audio-api-pitfalls)
 
 ---
 
@@ -64,28 +56,17 @@ draft: true
 
 ---
 
-### 視窗控制：置頂與縮小到托盤
+### ✅ 視窗控制：置頂與縮小到托盤
 
-**來源 commit**：`feat: 新增視窗控制功能 - 置頂開關與縮小到托盤`
-
-**可寫內容**：
-- always on top 的實作
-- 系統托盤的設計考量
-- 點 X 是關閉還是縮小？使用者預期
+**已完成** → [electron-window-controls.md](/Evernote/posts/electron-window-controls)
 
 ---
 
 ## 🎨 UI/UX 設計
 
-### 中文桌面應用的字體選擇
+### ✅ 中文桌面應用的字體選擇
 
-**來源 commit**：`style: 統一使用源雲明體`、`style: 新增 jf open 粉圓作為次字體`
-
-**可寫內容**：
-- 為什麼不用系統預設字體
-- 源雲明體 vs 思源黑體 vs 蘋方
-- 字體載入與效能
-- 開源中文字體推薦
+**已完成** → [chinese-font-selection.md](/Evernote/posts/chinese-font-selection)
 
 ---
 
@@ -113,14 +94,9 @@ draft: true
 
 ## ⚙️ 功能實作
 
-### 字典替換：自動校正專有名詞
+### ✅ 字典替換：自動校正專有名詞
 
-**來源 commit**：`feat: 新增字典替換功能 - 自動校正語音辨識中的專有名詞`
-
-**可寫內容**：
-- 熱詞 vs 字典替換的差異
-- 後處理校正的實作
-- 正規表達式替換 vs 精確匹配
+**已完成** → [dictionary-replacement.md](/Evernote/posts/dictionary-replacement)
 
 ---
 
@@ -181,10 +157,16 @@ draft: true
 
 ## 優先順序建議
 
-1. **Web Audio API 的坑** - 串流文章有預告，讀者會期待
-2. **字體選擇** - 獨立主題，不依賴其他文章
-3. **字典替換** - 跟熱詞文章互補
-4. **視窗控制** - Electron 系列的延續
+~~1. **Web Audio API 的坑** - ✅ 已完成~~
+~~2. **字體選擇** - ✅ 已完成~~
+~~3. **字典替換** - ✅ 已完成~~
+~~4. **視窗控制** - ✅ 已完成~~
+
+**下一輪**：
+1. **音頻預處理** - 技術含量高
+2. **OpenCC 的坑** - 簡單但實用
+3. **串流視覺反饋** - UI/UX 系列
+4. **electronmon** - Electron 系列
 
 ---
 

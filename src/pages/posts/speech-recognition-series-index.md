@@ -55,6 +55,7 @@ tags:
 | 文章 | 內容 |
 |------|------|
 | [用 5KB 正規表達式幹掉 500MB 深度學習模型](/Evernote/posts/rule-based-punctuation-restoration) | 規則式標點恢復 |
+| [字典替換：語音辨識的後處理校正](/Evernote/posts/dictionary-replacement) | 熱詞搞不定的用字典補 |
 
 ### Electron 開發
 
@@ -63,6 +64,14 @@ tags:
 | 文章 | 內容 |
 |------|------|
 | [為什麼桌面應用不能多開？談 Electron 單實例鎖](/Evernote/posts/why-prevent-multiple-instances) | 多開會炸的原因，以及怎麼防止 |
+| [Electron 視窗控制：置頂與縮小到托盤](/Evernote/posts/electron-window-controls) | always on top、系統托盤 |
+| [Web Audio API 的坑：ScriptProcessor 已死，AudioWorklet 還沒活](/Evernote/posts/web-audio-api-pitfalls) | 音頻擷取的血淚史 |
+
+### UI/UX 設計
+
+| 文章 | 內容 |
+|------|------|
+| [中文桌面應用的字體選擇](/Evernote/posts/chinese-font-selection) | 源雲明體、jf open 粉圓、開源字體推薦 |
 
 ### 方法論
 

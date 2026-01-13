@@ -14,6 +14,9 @@ tags:
 
 台灣人聽到「白牌」，第一反應大概是白牌計程車——沒有計程車牌照，但私底下載客的車。
 
+![透過 LINE 群組叫白牌車的對話截圖](https://shuj.shu.edu.tw/wp-content/uploads/2021/05/S__1515663.jpg)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>在台灣，白牌是遊走灰色地帶的代名詞。在軟體圈，白牌是讓客戶站上舞台的魔法。</small></p>
+
 但在軟體世界裡，白牌（White Label）是完全不同的東西。
 
 它指的是：**你做的產品，可以貼上別人的品牌**。
@@ -40,6 +43,11 @@ tags:
 
 如果不特別去查，你根本不知道這家店是架在 Shopify 上。
 
+![Shopify 商店範例：家居品牌](https://cdn.shopify.com/shopifycloud/brochure/assets/examples/image-tabs/home-and-decor/poly-and-bark-large-a8df2c510b6e18b359caba00b02f7a38a86bdc44a955a0cc01ff965a919ecf9c.jpg)
+
+![Shopify 商店範例：服飾品牌](https://cdn.shopify.com/shopifycloud/brochure/assets/examples/image-tabs/clothing-and-fashion/negative-underwear-large-aa1b6de0850a8a1af24c3f24f9b6d2a3b8a836be74b3debcdbcec1bfe24c944d.jpg)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>這兩個網站都是用 Shopify 架的。你看得出來嗎？</small></p>
+
 **這就是白牌的魔法——平台退到幕後，讓商家站到台前。**
 
 ---
@@ -59,6 +67,9 @@ Multi-Tenant 的做法是大家共用同一套系統，但資料彼此隔離。
 每個客戶叫做一個「租戶（Tenant）」。
 
 租戶 A 看不到租戶 B 的資料，就像住在同一棟大樓的不同住戶，各自有獨立的空間。
+
+![Multi-Tenant 就像公寓大樓，大家共用基礎設施但各自獨立](https://www.gooddata.com/img/blog/_2000xauto/tenants_building.png.webp)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>房東只有一個，但每戶都覺得這是自己的家。</small></p>
 
 白牌功能，就是讓每個租戶可以自訂自己的「門面」——Logo、顏色、網站名稱。
 
@@ -195,6 +206,9 @@ export function TenantTheme() {
 
 Favicon 是瀏覽器 tab 上的小圖示。
 
+![Favicon 就是瀏覽器分頁標籤上的那個小圖示](https://www.w3schools.com/html/img_favicon.png)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>16x16 像素的小東西，卻是品牌識別的重要一環。</small></p>
+
 這個比較麻煩，因為 favicon 通常是在 HTML `<head>` 裡面用 `<link>` 標籤指定的，是靜態的。
 
 解法是用 JavaScript 動態修改 `<head>` 裡面的內容：
@@ -327,6 +341,9 @@ const siteName = settings?.site_name || '預設名稱';
 新增一個租戶只是在資料庫插一筆資料，不是開一台機器。
 
 當然也有代價——每個功能都要考慮「這是哪個租戶的？」，複雜度蹭蹭往上漲。
+
+![Notion 的 Teamspace 功能就是 Multi-Tenant 的實際應用](https://images.ctfassets.net/spoqsaf9291f/1y8zOHVAPsvoKhcfV2ZuFq/d53ca7ae217a0ff77576ec2a8038224f/teamspaces-best-practice__4_.png)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>你用的 Notion、Slack、Shopify，背後都是同一套邏輯。</small></p>
 
 但對我來說，能用同一套系統服務幾十個講師，比幫每個講師維護一套獨立系統划算太多了。
 
