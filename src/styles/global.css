@@ -458,8 +458,25 @@ body {
     padding: var(--space-lg) 0;
   }
 
+  .site-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .nav-links {
+    gap: var(--space-md);
+  }
+
   .post-header .post-title {
     font-size: 1.4rem;
+  }
+
+  /* 表格水平捲動 */
+  .post-content table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 }
 
