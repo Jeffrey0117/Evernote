@@ -5,13 +5,15 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && npx pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.0",
+    "@astrojs/rss": "^4.0.14",
     "@astrojs/sitemap": "^3.6.1",
-    "astro": "^5.0.0"
+    "astro": "^5.0.0",
+    "pagefind": "^1.4.0"
   }
 }

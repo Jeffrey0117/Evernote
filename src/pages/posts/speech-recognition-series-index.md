@@ -8,7 +8,13 @@ tags:
   - 索引
 ---
 
-這是我做語音辨識桌面應用的完整記錄，從選型、優化到踩坑，整理成 9 篇文章。
+這是我做語音辨識桌面應用的完整記錄，從選型、優化到產品，整理成系列文章。
+
+## 產品介紹
+
+| 文章 | 內容 |
+|------|------|
+| [聲聲慢：我做了一個離線語音轉文字工具](/Evernote/posts/shengshengman-intro) | 產品介紹、功能、未來計畫（APP 版） |
 
 ## 分類總覽
 
@@ -39,6 +45,8 @@ tags:
 | [FunASR 極限優化指南](/Evernote/posts/funasr-optimization-guide) | 並行載入、量化、執行緒調整 |
 | [Sherpa-ONNX 雙模型架構優化實戰](/Evernote/posts/sherpa-onnx-optimization) | 離線 + 串流雙模型、VAD、音頻預處理 |
 | [串流語音辨識的參數調教之路](/Evernote/posts/streaming-speech-recognition-optimization) | 端點偵測、int8 踩坑、參數平衡 |
+| [熱詞功能實作：讓語音辨識認得你的專有名詞](/Evernote/posts/hotwords-implementation) | Hotwords 原理與實作 |
+| [從 FunASR 遷移到 Sherpa-ONNX](/Evernote/posts/funasr-to-sherpa-migration) | 架構遷移的決策與過程 |
 
 ### 周邊工具
 
@@ -47,6 +55,14 @@ tags:
 | 文章 | 內容 |
 |------|------|
 | [用 5KB 正規表達式幹掉 500MB 深度學習模型](/Evernote/posts/rule-based-punctuation-restoration) | 規則式標點恢復 |
+
+### Electron 開發
+
+桌面應用開發的眉角。
+
+| 文章 | 內容 |
+|------|------|
+| [為什麼桌面應用不能多開？談 Electron 單實例鎖](/Evernote/posts/why-prevent-multiple-instances) | 多開會炸的原因，以及怎麼防止 |
 
 ### 方法論
 

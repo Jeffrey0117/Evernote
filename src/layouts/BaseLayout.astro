@@ -51,6 +51,13 @@ const randomTagline = taglines[Math.floor(Math.random() * taglines.length)];
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Pagefind Search -->
+    <link href="/Evernote/pagefind/pagefind-ui.css" rel="stylesheet" />
+    <script src="/Evernote/pagefind/pagefind-ui.js" is:inline></script>
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="Jeffrey0117 技術筆記" href="/Evernote/rss.xml" />
   </head>
   <body>
     <div class="container">
@@ -63,21 +70,126 @@ const randomTagline = taglines[Math.floor(Math.random() * taglines.length)];
           <ul class="nav-links">
             <li><a href="/Evernote/">筆記</a></li>
             <li><a href="/Evernote/about">關於</a></li>
+            <li><button id="search-btn" class="search-btn">搜尋</button></li>
           </ul>
         </nav>
       </header>
+
+      <!-- Search Modal -->
+      <div id="search-modal" class="search-modal">
+        <div class="search-modal-content">
+          <button id="search-close" class="search-close">&times;</button>
+          <div id="search"></div>
+        </div>
+      </div>
 
       <main>
         <slot />
       </main>
 
       <footer class="site-footer">
-        <p>Built with Astro · Jeffrey0117 技術筆記</p>
+        <p>Built with Astro · Jeffrey0117 技術筆記 · <a href="/Evernote/rss.xml">RSS</a></p>
       </footer>
     </div>
 
     <style is:global>
       @import '../styles/global.css';
     </style>
+
+    <style>
+      .search-btn {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        background: transparent;
+        border: 1px solid var(--bg-tertiary);
+        padding: 0.3em 0.8em;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .search-btn:hover {
+        border-color: var(--accent-light);
+        color: var(--text-primary);
+      }
+      .search-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 10vh;
+      }
+      .search-modal.active {
+        display: flex;
+      }
+      .search-modal-content {
+        background: var(--bg-primary);
+        width: 90%;
+        max-width: 600px;
+        border-radius: 8px;
+        padding: var(--space-lg);
+        position: relative;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      .search-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+      }
+      .search-close:hover {
+        color: var(--text-primary);
+      }
+    </style>
+
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', () => {
+        const searchBtn = document.getElementById('search-btn');
+        const searchModal = document.getElementById('search-modal');
+        const searchClose = document.getElementById('search-close');
+
+        // Initialize Pagefind
+        if (typeof PagefindUI !== 'undefined') {
+          new PagefindUI({
+            element: '#search',
+            showSubResults: true,
+            showImages: false,
+          });
+        }
+
+        searchBtn?.addEventListener('click', () => {
+          searchModal?.classList.add('active');
+          document.querySelector('.pagefind-ui__search-input')?.focus();
+        });
+
+        searchClose?.addEventListener('click', () => {
+          searchModal?.classList.remove('active');
+        });
+
+        searchModal?.addEventListener('click', (e) => {
+          if (e.target === searchModal) {
+            searchModal.classList.remove('active');
+          }
+        });
+
+        // ESC to close
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            searchModal?.classList.remove('active');
+          }
+        });
+      });
+    </script>
   </body>
 </html>

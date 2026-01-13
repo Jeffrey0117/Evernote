@@ -101,557 +101,286 @@ Jeff 是 Jeff，這件事不會變。
 
 ---
 
-## 三層權限模型
+## 用門禁系統理解三層權限
 
-踩完坑之後，我重新設計了權限架構。分成三層：
+踩完坑之後，我重新設計了權限架構。
+分成三層，用大樓門禁來比喻：
 
-```
-┌─────────────────────────────────────┐
-│      第一層：認證（Authentication）  │
-│      這個人是誰？有沒有登入？         │
-└────────────────┬────────────────────┘
-                 │
-┌────────────────▼────────────────────┐
-│      第二層：租戶歸屬（Tenant Access）│
-│      這個人屬於哪些租戶？角色是什麼？  │
-└────────────────┬────────────────────┘
-                 │
-┌────────────────▼────────────────────┐
-│      第三層：資源權限（Resource ACL） │
-│      這個人對這個資源有什麼權限？      │
-└─────────────────────────────────────┘
-```
+**第一層：你是不是住戶？**
 
-每一層負責不同的事：
+大樓門口有警衛。
+他不管你住哪一戶，只管你是不是這棟大樓的人。
+有門禁卡就放行，沒有就請回。
 
-**第一層：認證**
-
-最基本的。
-用戶有沒有登入？token 有沒有過期？
+這是「認證」——你是誰？你有沒有登入？
 [Supabase](https://supabase.com/) Auth 幫我處理這層。
 
-**第二層：租戶歸屬**
+**第二層：你住哪一戶？你是什麼身份？**
 
-這個用戶屬於哪些租戶？在每個租戶裡的角色是什麼？
-這是多租戶權限的核心，待會詳細講。
+進了大樓，你要去哪？
+你是 12 樓 A 戶的屋主，還是 5 樓 B 戶的訪客？
+屋主可以進自己家，訪客要有人帶。
 
-**第三層：資源權限**
+這是「租戶歸屬」——你屬於哪些租戶？在每個租戶裡的角色是什麼？
+**這是多租戶權限的核心。**
 
-針對特定資源的細粒度權限。
-例如：這個用戶可以編輯這堂課嗎？可以看到這張訂單嗎？
+**第三層：你能動這個東西嗎？**
 
-三層分開，邏輯就清楚了。
+進了家門，你能動什麼？
+屋主可以換家具、丟垃圾。
+訪客只能坐著喝茶，不能翻抽屜。
+
+這是「資源權限」——你對這個特定的東西有什麼權限？
+
+三層分開，各司其職：
+
+| 層級 | 問的問題 | 處理者 |
+|------|----------|--------|
+| 認證 | 你是誰？ | Supabase Auth |
+| 租戶歸屬 | 你跟這個租戶什麼關係？ | user_tenant_access 表 |
+| 資源權限 | 你能動這個東西嗎？ | 商業邏輯判斷 |
+
+這樣拆開，每一層只需要回答一個問題。
+不用在一個 function 裡面塞十幾個 `if`。
 
 ---
 
 ## 那張關鍵的中間表
 
-解決「用戶同時屬於多個租戶」的關鍵是這張表：
+三層架構的核心在第二層。
+而第二層的實作，就是一張中間表。
+
+### 為什麼需要中間表？
+
+原本我的設計是這樣：
+
+- users 表有一個 role 欄位
+- users 表有一個 tenant_id 欄位
+
+一個用戶，一個角色，一個租戶。
+簡單，但錯了。
+
+現實是：**一個用戶可以同時屬於多個租戶，而且在每個租戶的角色不同。**
+
+這是典型的「多對多關係」。
+解法就是加一張中間表，記錄「誰」和「哪個租戶」的「什麼關係」。
+
+### user_tenant_access 表
 
 ```sql
 CREATE TABLE user_tenant_access (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  role TEXT NOT NULL DEFAULT 'member',
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
+  user_id UUID NOT NULL,   -- 誰
+  tenant_id UUID NOT NULL, -- 哪個租戶
+  role TEXT NOT NULL,      -- 什麼關係
 
-  -- 同一個用戶在同一個租戶只能有一筆記錄
-  UNIQUE(user_id, tenant_id)
+  UNIQUE(user_id, tenant_id) -- 同一個人在同一個租戶只有一種角色
 );
-
--- 加索引，查詢會很頻繁
-CREATE INDEX idx_uta_user ON user_tenant_access(user_id);
-CREATE INDEX idx_uta_tenant ON user_tenant_access(tenant_id);
-CREATE INDEX idx_uta_user_tenant ON user_tenant_access(user_id, tenant_id);
 ```
+
+就這三個欄位，核心概念很簡單。
 
 現在 Jeff 的權限變成這樣：
 
-```
-user_tenant_access 表：
-┌──────────┬────────────────┬────────────────┬─────────┐
-│ id       │ user_id        │ tenant_id      │ role    │
-├──────────┼────────────────┼────────────────┼─────────┤
-│ 1        │ jeff           │ jeff_academy   │ owner   │  ← Jeff 是自己學院的 owner
-│ 2        │ jeff           │ alice_academy  │ member  │  ← Jeff 是 Alice 學院的學生
-│ 3        │ jeff           │ bob_academy    │ admin   │  ← Jeff 是 Bob 學院的管理員
-└──────────┴────────────────┴────────────────┴─────────┘
-```
+| user_id | tenant_id | role |
+|---------|-----------|------|
+| jeff | jeff_academy | owner |
+| jeff | alice_academy | member |
+| jeff | bob_academy | admin |
 
 一個用戶，三個租戶，三種不同的角色。
+不用再糾結「Jeff 到底是什麼 role」，因為要看「Jeff 在哪裡」。
 
-查詢也變簡單了：
+### 為什麼要加 UNIQUE 約束？
 
-```typescript
-// 取得用戶在特定租戶的角色
-async function getUserTenantRole(userId: string, tenantId: string) {
-  const { data } = await supabase
-    .from('user_tenant_access')
-    .select('role')
-    .eq('user_id', userId)
-    .eq('tenant_id', tenantId)
-    .single();
+`UNIQUE(user_id, tenant_id)` 這行很重要。
 
-  return data?.role ?? null;
-}
+它確保同一個人在同一個租戶只會有一筆記錄。
+不然可能會出現：
 
-// 取得用戶所有的租戶
-async function getUserTenants(userId: string) {
-  const { data } = await supabase
-    .from('user_tenant_access')
-    .select(`
-      role,
-      tenant:tenants(id, name, slug, logo_url)
-    `)
-    .eq('user_id', userId);
+| user_id | tenant_id | role |
+|---------|-----------|------|
+| jeff | jeff_academy | owner |
+| jeff | jeff_academy | member |
 
-  return data ?? [];
-}
-```
+Jeff 在自己學院同時是 owner 又是 member？
+這種資料不應該存在。
+加了 UNIQUE，資料庫會幫你擋掉。
 
 ---
 
 ## 角色不要設計太多
 
+有了中間表，接下來要決定：role 有哪些值？
+
 我只用三個：
 
-| 角色 | 說明 | 典型權限 |
-|------|------|----------|
-| **owner** | 租戶擁有者 | 所有權限，包含刪除租戶、轉移擁有權 |
-| **admin** | 管理員 | 管理課程、訂單、用戶，但不能刪除租戶 |
-| **member** | 一般成員 | 查看已購買的內容，不能管理後台 |
+| 角色 | 說明 | 能幹嘛 |
+|------|------|--------|
+| **owner** | 租戶擁有者 | 什麼都能做，包含刪除整個租戶 |
+| **admin** | 管理員 | 管理日常營運，但不能動租戶本身 |
+| **member** | 一般成員 | 只能用，不能管 |
 
-為什麼分 owner 和 admin？
+三個就夠了。
 
-因為有些操作只有擁有者能做：
+很多人會想：要不要加個 super_admin？要不要分 editor 和 viewer？要不要有 moderator？
 
+不要。
+
+角色越多，權限判斷越複雜，維護成本越高。
+真的有需要再加，不要預先設計。
+
+### 為什麼要分 owner 和 admin？
+
+這是我被教訓過才學到的。
+
+我聽過一個案例：某個 SaaS 產品的創辦人，請了一個人幫忙管理後台，給他 admin 權限。
+結果那個人把創辦人的帳號權限降級了，創辦人反而被鎖在門外。
+
+聽起來很扯，但技術上完全可能發生。
+
+如果 admin 可以管理其他 admin，那 admin 就可以把 owner 踢掉。
+這不是 bug，是設計問題。
+
+所以我把 owner 獨立出來：
+
+**owner 能做、admin 不能做的事：**
 - 刪除整個租戶
-- 把擁有權轉讓給別人
+- 轉移擁有權給別人
 - 修改計費資訊
-- 管理其他 admin
+- 新增或移除其他 admin
 
-如果 admin 可以把另一個 admin 踢掉，那 owner 請人幫忙管理的時候，可能反過來被踢走。
-這種事真的會發生。
+admin 可以幫你管課程、管訂單、管學生。
+但 admin 動不了你的根本——帳號還是你的。
 
-角色的權限定義：
-
-```typescript
-const ROLE_PERMISSIONS = {
-  owner: [
-    'tenant:delete',
-    'tenant:transfer',
-    'tenant:billing',
-    'admin:manage',
-    'course:*',
-    'order:*',
-    'user:*',
-    'settings:*',
-  ],
-  admin: [
-    'course:*',
-    'order:*',
-    'user:view',
-    'user:invite',
-    'settings:view',
-    'settings:edit',
-  ],
-  member: [
-    'course:view_purchased',
-    'order:view_own',
-    'profile:edit',
-  ],
-} as const;
-
-function hasPermission(role: string, permission: string): boolean {
-  const permissions = ROLE_PERMISSIONS[role] ?? [];
-
-  return permissions.some(p => {
-    if (p === permission) return true;
-    if (p.endsWith(':*')) {
-      const prefix = p.slice(0, -1); // 'course:*' -> 'course:'
-      return permission.startsWith(prefix);
-    }
-    return false;
-  });
-}
-```
-
-用法：
-
-```typescript
-const role = await getUserTenantRole(userId, tenantId);
-
-if (!role) {
-  throw new Error('用戶不屬於此租戶');
-}
-
-if (!hasPermission(role, 'course:edit')) {
-  throw new Error('沒有編輯課程的權限');
-}
-```
+這就像公司的股東和總經理。
+總經理權力很大，但他不能把股東踢出公司。
 
 ---
 
-## 這個用戶可以看這堂課嗎
+## 第三層：這個人能動這個東西嗎
 
-第三層是針對特定資源的權限。
+前兩層處理完「你是誰」和「你跟這個租戶什麼關係」。
+第三層要回答更具體的問題：**你能對這個特定的東西做什麼？**
 
-例如「這個用戶可以看這堂課嗎」，不只看角色，還要看其他條件：
+舉例：「這個用戶可以看這堂課嗎？」
 
-```typescript
-interface CourseAccessResult {
-  canView: boolean;
-  canEdit: boolean;
-  canDelete: boolean;
-  reason?: string;
-}
+光知道他是 member 還不夠，還要看：
 
-async function canAccessCourse(
-  userId: string,
-  courseId: string
-): Promise<CourseAccessResult> {
-  // 1. 取得課程資訊
-  const { data: course } = await supabase
-    .from('courses')
-    .select('id, tenant_id, status, creator_id')
-    .eq('id', courseId)
-    .single();
+1. 這堂課是公開的還是付費的？
+2. 如果是付費的，他有沒有買？
+3. 如果他是 admin，那就不用管有沒有買
 
-  if (!course) {
-    return { canView: false, canEdit: false, canDelete: false, reason: '課程不存在' };
-  }
+判斷流程：
 
-  // 2. 取得用戶在這個租戶的角色
-  const role = await getUserTenantRole(userId, course.tenant_id);
-
-  // 不屬於這個租戶
-  if (!role) {
-    return { canView: false, canEdit: false, canDelete: false, reason: '無權存取此租戶' };
-  }
-
-  // 3. owner 和 admin 有完整權限
-  if (role === 'owner' || role === 'admin') {
-    return { canView: true, canEdit: true, canDelete: role === 'owner' };
-  }
-
-  // 4. member 要檢查是否購買
-  if (role === 'member') {
-    // 公開課程可以看
-    if (course.status === 'public') {
-      return { canView: true, canEdit: false, canDelete: false };
-    }
-
-    // 檢查是否有購買記錄
-    const { data: enrollment } = await supabase
-      .from('enrollments')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('course_id', courseId)
-      .single();
-
-    if (enrollment) {
-      return { canView: true, canEdit: false, canDelete: false };
-    }
-
-    return { canView: false, canEdit: false, canDelete: false, reason: '尚未購買此課程' };
-  }
-
-  return { canView: false, canEdit: false, canDelete: false, reason: '未知角色' };
-}
+```
+用戶要看課程 A
+    ↓
+課程 A 屬於租戶 X
+    ↓
+用戶在租戶 X 的角色是什麼？
+    ↓
+┌─────────────────────────────────────────┐
+│ owner / admin → 直接放行                │
+│ member → 檢查課程是否公開，或是否已購買  │
+│ 不屬於租戶 X → 拒絕                     │
+└─────────────────────────────────────────┘
 ```
 
-API 裡面這樣用：
-
-```typescript
-// app/api/courses/[id]/route.ts
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const user = await getUser(request);
-
-  const access = await canAccessCourse(user.id, params.id);
-
-  if (!access.canView) {
-    return NextResponse.json({ error: access.reason }, { status: 403 });
-  }
-
-  // 繼續處理...
-}
-```
-
-邏輯很清楚，而且每個決策點都可以追蹤。
+這個流程很清楚，每一步都只問一個問題。
+比起原本那坨義大利麵，好維護太多了。
 
 ---
 
-## 跟 RLS 的搭配
+## 兩層防護：應用層和資料庫層
 
-這套權限設計要配合 [Supabase](https://supabase.com/) 的 [RLS](/posts/supabase-rls-multi-tenant) 才完整。
+到這裡，權限判斷都在應用層（TypeScript）做。
+但這樣夠嗎？
 
-應用層（TypeScript）負責**商業邏輯**的權限判斷：這個用戶可不可以編輯這堂課？可不可以退款？
+不夠。
 
-資料庫層（RLS）負責**資料隔離**的最後防線：就算應用層出 bug，資料也不會洩漏到其他租戶。
+如果你的程式碼有 bug，權限檢查被繞過了怎麼辦？
+如果新來的工程師忘記加權限檢查怎麼辦？
 
-RLS 政策會用到 `user_tenant_access` 表：
+所以要在資料庫層再加一道防線——[RLS（Row Level Security）](/posts/supabase-rls-multi-tenant)。
+
+### 兩層各負責什麼？
+
+| 層級 | 負責 | 失敗的後果 |
+|------|------|-----------|
+| 應用層 | 商業邏輯判斷、友善錯誤訊息 | 用戶體驗差 |
+| 資料庫層 | 資料隔離的最後防線 | 資料外洩 |
+
+應用層可以給用戶清楚的錯誤訊息：「您沒有權限編輯這堂課」。
+資料庫層不管這些，它只管一件事：**就算程式出 bug，資料也不會洩漏到其他租戶。**
+
+這叫「深度防禦」。
+一層出問題，還有另一層擋著。
+
+### RLS 怎麼用 user_tenant_access？
+
+RLS 政策可以直接查 user_tenant_access 表：
 
 ```sql
--- 課程表的 RLS：只能看到自己所屬租戶的課程
-CREATE POLICY "Users can view courses in their tenants" ON courses
-  FOR SELECT
-  USING (
-    tenant_id IN (
-      SELECT tenant_id
-      FROM user_tenant_access
-      WHERE user_id = auth.uid()
-    )
-  );
-
--- 編輯權限：只有 owner 和 admin 可以
-CREATE POLICY "Admins can update courses" ON courses
-  FOR UPDATE
-  USING (
-    tenant_id IN (
-      SELECT tenant_id
-      FROM user_tenant_access
-      WHERE user_id = auth.uid()
-      AND role IN ('owner', 'admin')
-    )
-  );
-
--- 刪除權限：只有 owner 可以
-CREATE POLICY "Owners can delete courses" ON courses
-  FOR DELETE
-  USING (
-    tenant_id IN (
-      SELECT tenant_id
-      FROM user_tenant_access
-      WHERE user_id = auth.uid()
-      AND role = 'owner'
-    )
-  );
+-- 只能看到自己所屬租戶的課程
+CREATE POLICY "courses_select" ON courses FOR SELECT USING (
+  tenant_id IN (
+    SELECT tenant_id FROM user_tenant_access WHERE user_id = auth.uid()
+  )
+);
 ```
 
-兩層防護：
+這樣就算應用層忘記檢查，資料庫也會自動過濾。
+用戶只能看到他有權限看的資料。
 
-1. **應用層**：精細的商業邏輯判斷，提供友善的錯誤訊息
-2. **資料庫層**：最後防線，就算 code 有 bug 也不會洩漏資料
-
-這就是我在[第二篇](/posts/supabase-rls-multi-tenant)說的「深度防禦」。
+RLS 的詳細設計我在[另一篇](/posts/supabase-rls-multi-tenant)講過，這裡不展開。
 
 ---
 
-## 實用的輔助函數
+## 幾個實務上要注意的事
 
-日常開發會用到這些函數：
+概念講完了，實作的時候有幾個細節要注意。
 
-```typescript
-// lib/permissions.ts
+### 建立租戶時要自動設 owner
 
-/**
- * 確保用戶屬於租戶，否則拋出錯誤
- */
-export async function requireTenantAccess(
-  userId: string,
-  tenantId: string
-): Promise<string> {
-  const role = await getUserTenantRole(userId, tenantId);
+用戶建立新租戶時，一定要同時在 user_tenant_access 建一筆記錄，role 是 owner。
 
-  if (!role) {
-    throw new ForbiddenError('您沒有權限存取此租戶');
-  }
+這可以在應用層做，也可以用資料庫 trigger 自動處理。
+重點是：**不能漏掉這一步**，不然會出現沒有 owner 的孤兒租戶。
 
-  return role;
-}
+### 移除用戶時要檢查是不是 owner
 
-/**
- * 確保用戶是 admin 或 owner
- */
-export async function requireAdminAccess(
-  userId: string,
-  tenantId: string
-): Promise<void> {
-  const role = await requireTenantAccess(userId, tenantId);
+如果有人要把 owner 從租戶移除，要擋掉。
+owner 要離開，必須先轉移擁有權給別人。
 
-  if (role !== 'admin' && role !== 'owner') {
-    throw new ForbiddenError('此操作需要管理員權限');
-  }
-}
+不然租戶就變成無主之地了。
 
-/**
- * 確保用戶是 owner
- */
-export async function requireOwnerAccess(
-  userId: string,
-  tenantId: string
-): Promise<void> {
-  const role = await requireTenantAccess(userId, tenantId);
+### 用戶可以屬於多個租戶，需要切換介面
 
-  if (role !== 'owner') {
-    throw new ForbiddenError('此操作需要擁有者權限');
-  }
-}
+用戶登入後，要有地方讓他切換目前在操作哪個租戶。
+通常會做一個下拉選單，列出他所有的租戶和對應角色。
 
-/**
- * 新增用戶到租戶
- */
-export async function addUserToTenant(
-  userId: string,
-  tenantId: string,
-  role: 'owner' | 'admin' | 'member' = 'member'
-): Promise<void> {
-  const { error } = await supabase
-    .from('user_tenant_access')
-    .upsert({
-      user_id: userId,
-      tenant_id: tenantId,
-      role,
-      updated_at: new Date().toISOString(),
-    }, {
-      onConflict: 'user_id,tenant_id',
-    });
-
-  if (error) throw error;
-}
-
-/**
- * 從租戶移除用戶
- */
-export async function removeUserFromTenant(
-  userId: string,
-  tenantId: string
-): Promise<void> {
-  // 不能移除 owner
-  const role = await getUserTenantRole(userId, tenantId);
-
-  if (role === 'owner') {
-    throw new ForbiddenError('無法移除租戶擁有者，請先轉移擁有權');
-  }
-
-  await supabase
-    .from('user_tenant_access')
-    .delete()
-    .eq('user_id', userId)
-    .eq('tenant_id', tenantId);
-}
-```
-
----
-
-## 建立租戶時自動設定 owner
-
-用戶建立新租戶時，要自動成為 owner：
-
-```typescript
-export async function createTenant(
-  userId: string,
-  data: { name: string; slug: string }
-): Promise<Tenant> {
-  // 用 transaction 確保一致性
-  const { data: tenant, error: tenantError } = await supabase
-    .from('tenants')
-    .insert({
-      name: data.name,
-      slug: data.slug,
-    })
-    .select()
-    .single();
-
-  if (tenantError) throw tenantError;
-
-  // 建立者成為 owner
-  const { error: accessError } = await supabase
-    .from('user_tenant_access')
-    .insert({
-      user_id: userId,
-      tenant_id: tenant.id,
-      role: 'owner',
-    });
-
-  if (accessError) {
-    // rollback: 刪除剛建立的租戶
-    await supabase.from('tenants').delete().eq('id', tenant.id);
-    throw accessError;
-  }
-
-  return tenant;
-}
-```
-
-或者用 [PostgreSQL](https://www.postgresql.org/) 的 trigger 自動處理：
-
-```sql
-CREATE OR REPLACE FUNCTION auto_add_tenant_owner()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO user_tenant_access (user_id, tenant_id, role)
-  VALUES (auth.uid(), NEW.id, 'owner');
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_tenant_created
-  AFTER INSERT ON tenants
-  FOR EACH ROW
-  EXECUTE FUNCTION auto_add_tenant_owner();
-```
-
----
-
-## 租戶切換的 UX
-
-用戶可能屬於多個租戶，需要一個切換介面：
-
-```tsx
-// components/TenantSwitcher.tsx
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-export function TenantSwitcher({ currentTenantId }: { currentTenantId: string }) {
-  const [tenants, setTenants] = useState([]);
-  const router = useRouter();
-
-  useEffect(() => {
-    // 載入用戶所有的租戶
-    fetch('/api/me/tenants')
-      .then(res => res.json())
-      .then(data => setTenants(data));
-  }, []);
-
-  const handleSwitch = (tenantSlug: string) => {
-    // 切換到另一個租戶的後台
-    router.push(`/${tenantSlug}/dashboard`);
-  };
-
-  return (
-    <select
-      value={currentTenantId}
-      onChange={(e) => {
-        const tenant = tenants.find(t => t.id === e.target.value);
-        if (tenant) handleSwitch(tenant.slug);
-      }}
-    >
-      {tenants.map(tenant => (
-        <option key={tenant.id} value={tenant.id}>
-          {tenant.name} ({tenant.role})
-        </option>
-      ))}
-    </select>
-  );
-}
-```
-
-用戶選擇後，導向 `/[tenant]/dashboard`，這個路由設計在[第三篇](/posts/nextjs-multi-tenant-routing)有講。
+切換後，導向那個租戶的後台。
+路由設計可以看[這篇](/posts/nextjs-multi-tenant-routing)。
 
 ---
 
 繞了一大圈，核心就一句話：**權限不要綁在 user 上，要綁在「user 和 tenant 的關係」上。**
 
-搞懂這件事之後，三層權限模型（認證、租戶歸屬、資源權限）就是自然的結論。
-`user_tenant_access` 這張表是整個架構的核心，一個用戶可以屬於多個租戶，每個租戶有不同角色。
+搞懂這件事之後，三層架構就是自然的結論：
+
+1. **認證**：你是誰？（Supabase Auth 處理）
+2. **租戶歸屬**：你跟這個租戶什麼關係？（user_tenant_access 表）
+3. **資源權限**：你能動這個東西嗎？（商業邏輯判斷）
+
+`user_tenant_access` 這張中間表是整個架構的核心。
+一個用戶可以屬於多個租戶，每個租戶有不同角色。
+不用再煩惱「Jeff 到底是什麼 role」，因為要看他在哪裡。
 
 角色也不用設計太多，owner、admin、member 三個就夠。
-再配合 RLS 做深度防禦——應用層判斷商業邏輯，資料庫層防止資料洩漏。
+owner 和 admin 要分開，不然可能被自己請的人踢出去。
+
+最後再配合 RLS 做深度防禦——應用層判斷商業邏輯，資料庫層防止資料洩漏。
+兩層都過才能動資料，一層出問題還有另一層擋著。
 
 下一篇會講**租戶品牌自訂**——怎麼讓每個租戶有自己的 Logo、顏色、Favicon。
 這是 SaaS 產品很重要的功能，讓客戶覺得這是「他們的」平台，不是借用別人的。
