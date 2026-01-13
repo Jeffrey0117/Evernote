@@ -47,14 +47,14 @@ Google 搜尋「YouTube 下載」，出來一堆線上工具。
 
 | 層級 | 技術 | 為什麼選它 |
 |------|------|------|
-| 後端框架 | [FastAPI](https://fastapi.tiangolo.com/) | yt-dlp 是 Python 寫的，FastAPI 可以直接 import，不用開子進程 |
+| 後端框架 | [FastAPI](/posts/fastapi-why-i-switched-from-flask) | yt-dlp 是 Python 寫的，FastAPI 可以直接 import，不用開子進程 |
 | 下載核心 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | 比 youtube-dl 更新更快，YouTube 改版也能跟上 |
-| 即時推送 | WebSocket | 雙向通信，進度有更新才推，不用前端一直問 |
-| 資料庫 | SQLite | 單檔案資料庫，不用裝 MySQL，適合個人服務 |
-| 內網穿透 | [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) | 不用開 port、不用固定 IP，三行指令搞定 |
+| 即時推送 | [WebSocket](/posts/websocket-real-time-without-polling) | 雙向通信，進度有更新才推，不用前端一直問 |
+| 資料庫 | [SQLite](/posts/sqlite-the-database-you-already-have) | 單檔案資料庫，不用裝 MySQL，適合個人服務 |
+| 內網穿透 | [Cloudflare Tunnel](/posts/cloudflare-tunnel-expose-localhost-without-port-forwarding) | 不用開 port、不用固定 IP，三行指令搞定 |
 | 前端 | 原生 HTML/CSS/JS | 不想為了一個下載頁面引入 React |
 
-FastAPI 還有一個好處：原生支援非同步。
+[FastAPI](/posts/fastapi-why-i-switched-from-flask) 還有一個好處：原生支援非同步。
 
 下載是 I/O 密集的操作（大部分時間在等網路），非同步可以同時處理多個下載請求，不會卡住。
 
@@ -70,7 +70,7 @@ FastAPI 還有一個好處：原生支援非同步。
 
 其實大部分時候進度根本沒變，卻一直在白白發請求。
 
-後來改成 **WebSocket**——一種雙向通信協定，連線建立後，後端有更新就推，沒更新就不推。
+後來改成 **[WebSocket](/posts/websocket-real-time-without-polling)**——一種雙向通信協定，連線建立後，後端有更新就推，沒更新就不推。
 
 ```
 前端                    後端
@@ -84,7 +84,7 @@ FastAPI 還有一個好處：原生支援非同步。
   |                       |
 ```
 
-FastAPI 原生支援 WebSocket：
+[FastAPI](/posts/fastapi-why-i-switched-from-flask) 原生支援 WebSocket：
 
 ```python
 @router.websocket("/ws/progress/{task_id}")
@@ -164,7 +164,7 @@ async def download(request: Request):
 
 搞了一個晚上，放棄。
 
-後來發現 [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)。
+後來發現 [Cloudflare Tunnel](/posts/cloudflare-tunnel-expose-localhost-without-port-forwarding)。
 
 原理是在你的電腦上跑一個 agent，主動連到 Cloudflare 的伺服器。外面的請求進來時，Cloudflare 再轉給你。
 
