@@ -54,8 +54,7 @@ const totalWords = sortedPosts.reduce((sum, post) => {
 const jokes = [
   `比太陽系的行星多 ${Math.round(totalWords / 8).toLocaleString()} 倍`,
   `大概要 ${Math.round(totalWords / 400 / 60 * 10) / 10} 小時才看得完`,
-  `相當於 ${Math.round(totalWords / 140).toLocaleString()} 則推文`,
-  `是你 ${Math.round(totalWords / 20000 * 10) / 10} 天的呼吸次數`,
+  `是你 ${Math.round(totalWords / 20000)} 天的呼吸次數`,
   `可以印 ${Math.round(totalWords / 500)} 張 A4 紙`,
 ];
 const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
