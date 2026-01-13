@@ -28,7 +28,7 @@ PTT 每天都有新文章，爬蟲可能每小時跑一次。
 
 沒那麼簡單。
 
-## 為什麼不能用標題當 key
+## 第一個直覺：比對標題
 
 第一版的去重邏輯是這樣：
 
@@ -64,9 +64,39 @@ PTT 每天都有人發「[正妹] 今天的女神」、「[正妹] 路上看到�
 那用 URL 呢？URL 是唯一的，不會有這問題。
 但 PTT 的 URL 有時候超過 200 個字元，當資料庫 index 效能很差。
 
-## 用 hash 解決
+## 把 200 個字元壓成 64 個
 
-後來我想到一個方法：**把 URL 和標題組合起來，算一個 hash 值**。
+問題整理一下：
+- 標題不能當唯一識別（會重複）
+- URL 可以當唯一識別，但太長，index 效能差
+
+所以我需要一個方法：**把長字串變成固定長度的短字串，而且不會重複**。
+
+這就是 hash 在做的事。
+
+### 任意長度進去，固定長度出來
+
+Hash（雜湊）是一種單向函數，輸入任意長度的資料，輸出固定長度的字串。
+
+```
+"https://www.ptt.cc/bbs/Beauty/M.1234567890.A.ABC.html"
+    ↓ hash
+"a1b2c3d4e5f6..." (固定 64 字元)
+```
+
+重點是：
+- **固定長度**：不管輸入多長，輸出都一樣長
+- **不可逆**：從 hash 值無法還原原本的輸入
+- **抗碰撞**：不同的輸入幾乎不可能產生相同的輸出
+
+常見的 hash 演算法有 [MD5](https://en.wikipedia.org/wiki/MD5)、[SHA-1](https://en.wikipedia.org/wiki/SHA-1)、[SHA-256](https://en.wikipedia.org/wiki/SHA-2) 等。
+這篇文章介紹得蠻清楚的：[What Is Hashing?](https://www.geeksforgeeks.org/what-is-hashing/)。
+
+Hash 最常見的用途是密碼儲存（資料庫不存明文密碼，存 hash 值），但其實拿來做去重也超好用。
+
+### 所以我的做法
+
+**把 URL 和標題組合起來，算一個 hash 值**。
 
 [Node.js](https://nodejs.org/) 有內建的 `crypto` 模組，不用另外安裝：
 
@@ -93,7 +123,7 @@ a1b2c3d4e5f6... (64 個字元)
 
 存進資料庫，之後只要查 hash 有沒有存在就好。
 
-## 為什麼選 SHA256
+## 碰撞？別想了
 
 常見的 hash 演算法有 MD5 和 SHA256。
 
@@ -108,7 +138,7 @@ MD5 輸出 32 個字元，SHA256 輸出 64 個字元。
 
 別想了。
 
-## 實際怎麼用
+## 存進資料庫
 
 流程很簡單：
 1. 爬到一篇文章，算出 hash
@@ -117,7 +147,7 @@ MD5 輸出 32 個字元，SHA256 輸出 64 個字元。
 
 所以資料庫要存 hash，而且要能快速查詢。
 
-### 資料表設計
+### 表怎麼開
 
 我用 [Supabase](https://supabase.com/) 當資料庫。
 Supabase 是一個開源的 [Firebase](https://firebase.google.com/) 替代方案，底層跑的是 [PostgreSQL](https://www.postgresql.org/)（一種很成熟的關聯式資料庫）。
@@ -147,7 +177,7 @@ CREATE INDEX idx_scraped_items_hash ON scraped_items(robot_id, source_hash);
 這裡有個細節：`UNIQUE(robot_id, source_hash)` 是複合唯一鍵。
 因為我有多個爬蟲機器人，A 機器人爬過的文章 B 機器人可能還沒爬過。
 
-### 查詢邏輯
+### 查有沒有存在
 
 爬蟲跑的時候，先算 hash，查有沒有存在：
 
@@ -166,7 +196,7 @@ async function checkIsDuplicate(robotId, sourceHash) {
 
 如果不存在，就處理文章並把 hash 存進去。
 
-## 用 RPC 把邏輯搬進資料庫
+## 讓資料庫幫你做事
 
 上面的寫法可以動，但有個問題讓我很不爽。
 
@@ -203,19 +233,32 @@ class QueryBuilder {
 每次改需求，前端都要動。
 而且這些邏輯散落在前端 code 裡，哪天換人接手，他要看懂整個前端才知道去重邏輯怎麼運作。
 
+### 前端一行 code 搞定
+
 後來我發現一招：**把邏輯寫在資料庫裡，前端只要呼叫一個 function**。
 
 這招叫 RPC（Remote Procedure Call）。
 你在 PostgreSQL 裡面寫一個 function，前端一行 code 呼叫它，不用自己組 SQL。
 
+想深入了解可以看 [Supabase 官方的 RPC 文件](https://supabase.com/docs/guides/database/functions)。
+
+### 這招屌在哪
+
 聽起來好像只是換個地方寫 code，但意義完全不同。
+
 **你在寫資料庫的時候，其實是在幫未來的前端省事。**
+
 邏輯鎖在資料庫層，前端不用管實作細節，改需求也只改資料庫。
 
-這讓我體會到一件事：以前覺得「我是寫前端的，SQL 不關我事」，現在發現會一點資料庫，前端 code 可以變超乾淨。
+這讓我體會到一件事。
+以前覺得「我是寫前端的，SQL 不關我事」。
+現在發現會一點資料庫，前端 code 可以變超乾淨。
+
 什麼都要懂一點，才能做出好東西。
 
-在 Supabase 裡面，先建一個 function：
+### 先在資料庫建一個 function
+
+在 Supabase 裡面：
 
 ```sql
 CREATE OR REPLACE FUNCTION is_duplicate_item(
@@ -278,7 +321,7 @@ if (error) {
 去重失敗的時候，寧可多擋誤殺，也不要放過重複的。
 這種事錯一次就會被罵。
 
-## 其他做法比較
+## 還有什麼選擇
 
 | 方法 | 優點 | 缺點 | 適用場景 |
 |------|------|------|----------|
