@@ -13,9 +13,15 @@ tags:
 
 但有一個問題很多人沒處理：**token 會過期**。
 
+![Token 過期了](/Evernote/images/posts/oauth-expired.png)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>一小時後，你的 token 就會變成這副德性。</small></p>
+
 Google 的 access token 預設只有一小時的壽命。一小時後，你的 API 請求會開始噴 401，使用者莫名其妙被登出。
 
 ## OAuth 2.0 的 token 類型
+
+![三種 Token](/Evernote/images/posts/oauth-keys.png)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>Access Token 會過期、ID Token 證明身份、Refresh Token 是續命丹。</small></p>
 
 先搞清楚有哪些 token：
 
@@ -55,6 +61,9 @@ const login = useGoogleLogin({
 要拿 refresh token，需要用 `flow: 'auth-code'` 模式，然後在後端換 token。這比較複雜，很多小專案不想搞。
 
 ## 沒有 refresh token 怎麼辦
+
+![選擇](/Evernote/images/posts/oauth-choice.png)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>左邊是正規做法，右邊是懶人做法。猜猜我選哪個。</small></p>
 
 如果你的專案跟我一樣，只是個 side project，不想架後端處理 refresh token，有幾個選項：
 
@@ -154,6 +163,9 @@ useEffect(() => {
 
 Refresh token 需要後端配合，因為你不能把 client secret 放在前端。
 
+![前後端溝通](/Evernote/images/posts/oauth-flow.png)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>前端和後端就像異地戀，什麼都要靠傳訊息。</small></p>
+
 前端拿到 auth code 後要傳給後端，後端用 client secret 跟 Google 換 tokens，再把 access token 傳回前端，refresh token 留在後端。
 
 搞這麼複雜，就為了讓使用者不用每小時重新登入一次。
@@ -163,6 +175,9 @@ Refresh token 需要後端配合，因為你不能把 client secret 放在前端
 使用者一小時後被登出，重新登入就好。
 
 ---
+
+![Token 與時間](/Evernote/images/posts/oauth-token.png)
+<p align="center" style="margin-top: -1em; margin-bottom: 3em; color: #666;"><small>時間是 token 最大的敵人。</small></p>
 
 OAuth 看起來簡單，但魔鬼都在細節裡。
 
