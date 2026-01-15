@@ -20,6 +20,61 @@
 - Pagefind 全站搜尋
 - RSS feed
 - GitHub Actions 自動部署
+- **AI 寫作工具** — 用 Claude + Gemini 分工寫技術筆記
+
+## AI 寫作工具
+
+這套工具讓你用 AI 高效產出技術筆記，核心概念是 **分工省 token**：
+
+| 角色 | 任務 | 成本 |
+|------|------|------|
+| Claude | 從對話抽出原料（背景、踩坑、解法） | ~200 tokens |
+| Gemini | 讀完整規範，寫出文章 | 免費 |
+
+Claude 有對話 context 所以抽原料很快；Gemini 讀長文免費所以負責寫文章。
+
+### 三個工具
+
+```
+C:\DEV\Evernote\
+├── find-topics.bat    # 從 git commits 找新題材
+├── write-article.bat  # 叫 Gemini 寫文章
+└── move-articles.bat  # 搬文章到 posts/
+```
+
+**找題材：**
+```bash
+find-topics "C:\path\to\your\repo"
+# Gemini 會看 commits 和現有文章，建議不重複的新題材
+```
+
+**寫文章：**
+```bash
+write-article "React useEffect 清理函數踩坑"
+# Gemini 讀 project-guide.md 規範，產出符合風格的文章
+```
+
+**搬文章：**
+```bash
+move-articles
+# 把 cloudpipe 裡寫好的 .md 搬到 posts/
+```
+
+### 相關規範檔
+
+| 檔案 | 用途 |
+|------|------|
+| `src/pages/posts/project-guide.md` | 完整寫作規範（給 Gemini 讀） |
+| `src/pages/posts/context-spec.md` | 原料清單（給 Claude 讀） |
+
+### 工作流程
+
+1. 開發專案時用 Claude 解決問題
+2. 想寫筆記時，貼 `context-spec.md` 給 Claude
+3. Claude 輸出原料清單
+4. 執行 `write-article` 把原料丟給 Gemini
+5. 執行 `move-articles` 搬到 posts/
+6. 完成
 
 ## 技術棧
 
